@@ -8,7 +8,7 @@ void main(List<String> args) async {
     final cbuilder = CBuilder.library(
       name: packageName,
       assetName: '${packageName}_bindings_generated.dart',
-      sources: ['src/media_probe.c'],
+      sources: ['src/media_probe.c', 'src/media_metadata.c'],
     );
     final logger = Logger('')..level = Level.ALL;
     await cbuilder.run(input: input, output: output, logger: logger);
