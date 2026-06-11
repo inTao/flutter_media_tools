@@ -1,65 +1,43 @@
 # flutter_media_tools
 
-A Flutter plugin with a Rust-powered core for media processing.
+Flutter media tools FFI package.
 
-## Architecture
+## Usage
 
-```
-Flutter (Dart) → dart:ffi → Rust (cdylib)
-```
-
-Image processing (resize, rotate, crop, blur, grayscale, format conversion)
-runs in Rust for performance. Dart communicates via C-compatible FFI functions.
-
-## Getting Started
-
-### Prerequisites
-
-- Flutter SDK
-- Rust toolchain (`rustup`, `cargo`)
-
-### Build
-
-```bash
-# 1. Compile Rust library for your platform
-./native/build.sh macos   # or ios, linux, windows, android, all
-
-# 2. Run the example app
-cd example && flutter run -d macos
-```
-
-### Use in your project
+Use `getMediaInfo` to read structured information from a local media file.
 
 ```dart
 import 'package:flutter_media_tools/flutter_media_tools.dart';
 
-final native = MediaToolsNative.instance;
-
-// Get image info
-final info = native.imageInfo(imageBytes);
-print('${info.width}x${info.height} ${info.format}');
-
-// Resize
-final resized = native.resizeImage(imageBytes, 200, 200);
-
-// Rotate, crop, blur, grayscale, convert format...
-final gray = native.grayscaleImage(imageBytes);
-final png = native.convertFormat(imageBytes, 'png');
+final info = await getMediaInfo('/path/to/file.mp4');
 ```
 
-## Supported Operations
+Ask for a concrete subtype when the caller already expects a media kind.
 
-| Function | Description |
-|----------|-------------|
-| `greet(name)` | Test connectivity to Rust |
-| `imageInfo(data)` | Get width, height, format |
-| `resizeImage(data, w, h)` | Resize to exact dimensions |
-| `rotateImage(data, degrees)` | Rotate by 90/180/270 |
-| `cropImage(data, x, y, w, h)` | Crop region |
-| `blurImage(data, sigma)` | Gaussian blur |
-| `grayscaleImage(data)` | Convert to grayscale |
-| `convertFormat(data, format)` | Convert between png/jpeg/webp/bmp |
+```dart
+final ImageMediaInfo image = await getMediaInfo('/path/to/photo.png');
+final video = await getMediaInfo<VideoMediaInfo>('/path/to/file.mp4');
+```
 
-## Development
+## Project structure
 
-See [AGENTS.md](AGENTS.md) for architecture details and development workflow.
+* `src`: Contains the native source code.
+
+* `lib`: Contains the Dart code that defines the API of the plugin, and which
+  calls into the native code using `dart:ffi`.
+
+* `hook`: Contains `build.dart`, the build hook that compiles and bundles the
+  native code.
+
+## Building and bundling native code
+
+`hook/build.dart` does the building of native components.
+
+Bundling is done by Flutter based on the output from `build.dart`.
+
+## Binding to native code
+
+To use the native code, bindings in Dart are needed.
+To avoid writing these by hand, they are generated from the header file
+(`src/media_probe.h`) by `package:ffigen`.
+Regenerate the bindings by running `dart run ffigen --config ffigen.yaml`.

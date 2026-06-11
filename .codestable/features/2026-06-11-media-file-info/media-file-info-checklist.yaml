@@ -1,0 +1,87 @@
+feature: 2026-06-11-media-file-info
+created: 2026-06-11
+
+steps:
+  - action: "编排骨架：建立 getMediaInfo(path) 的异步调用和 typed exception 通道，native 节点先返回 stub payload"
+    exit_signal: "Dart 调用能从入口走到 subtype 组装，stub 图片结果可返回 ImageMediaInfo"
+    status: done
+  - action: "名词契约：落地 BaseMediaInfo 继承体系、subtype MIME enum、metadata / EXIF 承载对象"
+    exit_signal: "Dart 单测能通过 BaseMediaInfo 接收，并用 is ImageMediaInfo 访问图片字段"
+    status: done
+  - action: "native 探测节点：实现单个本地文件的 probe，覆盖图片、视频、音频核心字段"
+    exit_signal: "真实测试文件能读出宽高、时长、帧率、采样率、声道、codec、bitrate 中对应字段"
+    status: done
+  - action: "metadata / EXIF 映射：把 native 返回的容器 metadata 和图片 EXIF 映射到 Dart 对象"
+    exit_signal: "含 EXIF 的图片返回非空 exif；含 metadata 的媒体返回 metadata"
+    status: done
+  - action: "错误与边界：补齐不存在、不可读、unsupported、缺字段、probe failed 的错误语义"
+    exit_signal: "每类错误都有 typed exception 或明确空值策略，调用方无需解析 native 原始字符串"
+    status: done
+  - action: "验收覆盖：补齐图片、视频、音频和反向范围守护测试"
+    exit_signal: "第 3 节关键场景均有可观察证据"
+    status: done
+
+checks:
+  - item: "BaseMediaInfo 继承体系能承载图片、视频、音频 subtype"
+    source: 名词契约
+    status: pending
+  - item: "ImageMediaInfo.mime 使用 ImageMime.jpg/png/webp 等受限 enum"
+    source: 名词契约
+    status: pending
+  - item: "getMediaInfo(path) 返回 BaseMediaInfo subtype"
+    source: 编排骨架
+    status: pending
+  - item: "native probe 不阻塞主 isolate"
+    source: 流程级约束
+    status: pending
+  - item: "不存在、不可读、unsupported、native probe failed 能区分错误类型"
+    source: 流程级约束
+    status: pending
+  - item: "Dart package public API 新增 getMediaInfo 和媒体信息类型"
+    source: 挂载点
+    status: pending
+  - item: "Native FFI ABI 新增媒体探测入口"
+    source: 挂载点
+    status: pending
+  - item: "Native build hook 接入媒体探测 native 源文件"
+    source: 挂载点
+    status: pending
+  - item: "不扫描目录、不建立媒体库、不处理远程 URL"
+    source: 范围守护
+    status: pending
+  - item: "不转码、不剪辑、不播放、不生成缩略图"
+    source: 范围守护
+    status: pending
+  - item: "不修改或写回 EXIF / metadata"
+    source: 范围守护
+    status: pending
+  - item: "不引入批处理、队列、缓存"
+    source: 范围守护
+    status: pending
+  - item: "JPG / PNG / WebP 图片返回 ImageMediaInfo 和对应 ImageMime"
+    source: 验收场景
+    status: pending
+  - item: "含 EXIF 的图片返回 ImageMediaInfo.exif，缺 EXIF 返回空 map"
+    source: 验收场景
+    status: pending
+  - item: "视频路径返回 VideoMediaInfo 和可探测的视频字段"
+    source: 验收场景
+    status: pending
+  - item: "音频路径返回 AudioMediaInfo 和可探测的音频字段"
+    source: 验收场景
+    status: pending
+  - item: "BaseMediaInfo 可接收任意支持文件并通过 subtype 分支访问专属字段"
+    source: 验收场景
+    status: pending
+  - item: "扩展名和实际内容不一致时优先反映真实媒体格式并保留 extension"
+    source: 验收场景
+    status: pending
+  - item: "不存在或不可读路径抛出 typed exception"
+    source: 验收场景
+    status: pending
+  - item: "非媒体文件抛出 unsupported typed exception"
+    source: 验收场景
+    status: pending
+  - item: "缺字段返回 nullable 空值或空 map，不伪造默认值"
+    source: 验收场景
+    status: pending
