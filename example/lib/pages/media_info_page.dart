@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_media_tools/flutter_media_tools.dart';
 
+import '../services/media_file_picker.dart';
 import '../widgets/empty_panel.dart';
 import '../widgets/error_panel.dart';
 import '../widgets/media_info_result.dart';
@@ -14,32 +15,43 @@ class MediaInfoPage extends StatefulWidget {
 }
 
 class _MediaInfoPageState extends State<MediaInfoPage> {
-  final TextEditingController _pathController = TextEditingController();
+  final MediaFilePicker _filePicker = const MediaFilePicker();
 
   BaseMediaInfo? _info;
   String? _error;
+  MediaFileSelection? _selection;
   String? _lastPath;
   bool _isLoading = false;
 
-  @override
-  void dispose() {
-    _pathController.dispose();
-    super.dispose();
+  Future<void> _pickAndReadMediaInfo() async {
+    final MediaFileSelection? selection = await _filePicker.pickMediaFile();
+    if (selection == null) {
+      return;
+    }
+    await _readMediaInfo(selection);
   }
 
-  Future<void> _readMediaInfo() async {
-    final String path = _pathController.text.trim();
+  Future<void> _readSelectedMediaInfo() async {
+    final MediaFileSelection? selection = _selection;
+    if (selection == null) {
+      return;
+    }
+    await _readMediaInfo(selection);
+  }
+
+  Future<void> _readMediaInfo(MediaFileSelection selection) async {
     setState(() {
       _isLoading = true;
       _error = null;
       _info = null;
-      _lastPath = path;
+      _selection = selection;
+      _lastPath = selection.path;
     });
 
     try {
       // The public API returns the shared base type, then callers can branch on
       // the concrete subtype for media-specific fields.
-      final BaseMediaInfo info = await getMediaInfo(path);
+      final BaseMediaInfo info = await getMediaInfo(selection.path);
       if (!mounted) {
         return;
       }
@@ -69,11 +81,11 @@ class _MediaInfoPageState extends State<MediaInfoPage> {
     }
   }
 
-  void _clearPath() {
-    _pathController.clear();
+  void _clearSelection() {
     setState(() {
       _error = null;
       _info = null;
+      _selection = null;
       _lastPath = null;
     });
   }
@@ -97,10 +109,11 @@ class _MediaInfoPageState extends State<MediaInfoPage> {
                     Text('Media info', style: theme.textTheme.headlineMedium),
                     const SizedBox(height: 20),
                     ProbePanel(
-                      controller: _pathController,
                       isLoading: _isLoading,
-                      onClear: _clearPath,
-                      onSubmit: _readMediaInfo,
+                      selection: _selection,
+                      onClear: _clearSelection,
+                      onPick: _pickAndReadMediaInfo,
+                      onAnalyzeAgain: _readSelectedMediaInfo,
                     ),
                     const SizedBox(height: 20),
                     if (_isLoading) const LinearProgressIndicator(),
