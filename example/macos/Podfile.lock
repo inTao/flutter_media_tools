@@ -1,0 +1,22 @@
+PODS:
+  - flutter_media_tools (0.0.1):
+    - FlutterMacOS
+  - FlutterMacOS (1.0.0)
+
+DEPENDENCIES:
+  - flutter_media_tools (from `Flutter/ephemeral/.symlinks/plugins/flutter_media_tools/macos`)
+  - FlutterMacOS (from `Flutter/ephemeral`)
+
+EXTERNAL SOURCES:
+  flutter_media_tools:
+    :path: Flutter/ephemeral/.symlinks/plugins/flutter_media_tools/macos
+  FlutterMacOS:
+    :path: Flutter/ephemeral
+
+SPEC CHECKSUMS:
+  flutter_media_tools: 1b4f343bda9a25f80f82e604e98882e95eebad9d
+  FlutterMacOS: d0db08ddef1a9af05a5ec4b724367152bb0500b1
+
+PODFILE CHECKSUM: 54d867c82ac51cbd61b565781b9fada492027009
+
+COCOAPODS: 1.16.2
